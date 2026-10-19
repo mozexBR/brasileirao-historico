@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Brasileirão - Tabela Histórica dos Pontos Corridos</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --card-border: #334155;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --accent-green: #22c55e;
+            --accent-gold: #eab308;
+            --accent-blue: #3b82f6;
+            --hover-bg: #334155;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            padding: 2rem 1rem;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        header h1 {
+            font-size: 2.2rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #4ade80, #3b82f6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.5rem;
+        }
+
+        header p {
+            color: var(--text-secondary);
+            font-size: 1rem;
+        }
+
+        .upload-section {
+            background: var(--card-bg);
+            border: 2px dashed var(--card-border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+            margin-bottom: 2rem;
+            transition: all 0.2s ease;
+        }
+
+        .upload-section:hover {
+            border-color: var(--accent-green);
+        }
+
+        .upload-btn {
+            background: var(--accent-green);
+            color: #0f172a;
+            font-weight: 700;
+            padding: 0.6rem 1.2rem;
+            border-radius: 8px;
+            cursor: pointer;
+            display: inline-block;
+            margin-top: 0.5rem;
+            transition: background 0.2s;
+        }
+
+        .upload-btn:hover {
+            background: #16a34a;
+        }
+
+        #fileInput {
+            display: none;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+            padding: 1.2rem;
+        }
+
+        .stat-card h3 {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            color: var(--text-secondary);
+            letter-spacing: 0.05em;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-card .value {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: var(--accent-green);
+        }
+
+        .stat-card .subtext {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-top: 0.2rem;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .search-box {
+            position: relative;
+            flex: 1;
+            max-width: 400px;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 0.95rem;
+            outline: none;
+        }
+
+        .search-box input:focus {
+            border-color: var(--accent-blue);
+        }
+
+        .table-wrapper {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+            overflow-x: auto;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 0.95rem;
+        }
+
+        th, td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--card-border);
+        }
+
+        th {
+            background: #111827;
+            color: var(--text-secondary);
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.05em;
+            user-select: none;
+            cursor: pointer;
+        }
+
+        th:hover {
+            color: var(--text-primary);
+        }
+
+        tr:hover {
+            background-color: var(--hover-bg);
+        }
+
+        .pos-badge {
+            font-weight: 700;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+            background: #334155;
+        }
+
+        .pos-top1 {
+            background: #eab308;
+            color: #0f172a;
+        }
+
+        .pos-g4 {
+            border-left: 4px solid var(--accent-green);
+        }
+
+        .team-cell {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .team-logo {
+            width: 28px;
+            height: 28px;
+            object-fit: contain;
+            filter: drop-shadow(0px 2px 4px rgba(0,0,0,0.4));
+        }
+
+        .fallback-badge {
+            width: 28px;
+            height: 28px;
+            background: var(--card-border);
+            color: var(--text-primary);
+            font-size: 0.65rem;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            border: 1px solid var(--text-secondary);
+        }
+
+        .pts-col {
+            font-weight: 800;
+            color: var(--accent-green);
+            font-size: 1.05rem;
+        }
+
+        @media (max-width: 768px) {
+            header h1 { font-size: 1.6rem; }
+            th, td { padding: 0.6rem 0.5rem; font-size: 0.85rem; }
+            .team-logo, .fallback-badge { width: 24px; height: 24px; font-size: 0.55rem; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>Brasileirão — Era dos Pontos Corridos</h1>
+        <p>Ranking Histórico com Escudos dos Clubes (2003 - 2024)</p>
+    </header>
+
+    <div class="upload-section" id="dropZone">
+        <p id="uploadStatus">📂 Selecione o novo arquivo <strong>tabela_historica.json</strong> para carregar os dados:</p>
+        <label for="fileInput" class="upload-btn">Escolher Arquivo JSON</label>
+        <input type="file" id="fileInput" accept=".json">
+    </div>
+
+    <div class="stats-grid" id="statsGrid" style="display: none;">
+        <div class="stat-card">
+            <h3>Líder Histórico</h3>
+            <div class="value" id="statLider">-</div>
+            <div class="subtext" id="statLiderPts">-</div>
+        </div>
+        <div class="stat-card">
+            <h3>Melhor Saldo de Gols</h3>
+            <div class="value" id="statSaldo">-</div>
+            <div class="subtext" id="statSaldoTime">-</div>
+        </div>
+        <div class="stat-card">
+            <h3>Total de Clubes</h3>
+            <div class="value" id="statTotalClubes">-</div>
+            <div class="subtext">Já jogaram a Série A nos pontos corridos</div>
+        </div>
+    </div>
+
+    <div class="controls" id="controls" style="display: none;">
+        <div class="search-box">
+            <input type="text" id="searchInput" placeholder="Buscar clube (ex: São Paulo, Flamengo, Palmeiras)...">
+        </div>
+    </div>
+
+    <div class="table-wrapper" id="tableWrapper" style="display: none;">
+        <table>
+            <thead>
+                <tr>
+                    <th onclick="sortTable('Posição')">Pos</th>
+                    <th onclick="sortTable('Equipa')">Clube</th>
+                    <th onclick="sortTable('Pontos')">Pts</th>
+                    <th onclick="sortTable('Jogos')">J</th>
+                    <th onclick="sortTable('Vitorias')">V</th>
+                    <th onclick="sortTable('Empates')">E</th>
+                    <th onclick="sortTable('Derrotas')">D</th>
+                    <th onclick="sortTable('Golos_Marcados')">GP</th>
+                    <th onclick="sortTable('Golos_Sofridos')">GC</th>
+                    <th onclick="sortTable('Saldo_Golos')">SG</th>
+                    <th>Aprov (%)</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody">
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    let rawData = [];
+
+    window.addEventListener('DOMContentLoaded', () => {
+        fetch('tabela_historica.json')
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById('uploadStatus').innerText = '✅ Dados carregados automaticamente!';
+                initDashboard(data);
+            })
+            .catch(() => {});
+    });
+
+    document.getElementById('fileInput').addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                try {
+                    const data = JSON.parse(event.target.result);
+                    document.getElementById('uploadStatus').innerText = `✅ Arquivo "${file.name}" carregado com sucesso!`;
+                    initDashboard(data);
+                } catch (err) {
+                    alert('Erro ao ler o arquivo JSON.');
+                }
+            };
+            reader.readAsText(file);
+        }
+    });
+
+    function initDashboard(data) {
+        rawData = data;
+        renderStats(data);
+        renderTable(data);
+        document.getElementById('statsGrid').style.display = 'grid';
+        document.getElementById('controls').style.display = 'flex';
+        document.getElementById('tableWrapper').style.display = 'block';
+    }
+
+    function renderStats(data) {
+        if (!data || data.length === 0) return;
+        
+        const lider = data[0];
+        document.getElementById('statLider').innerText = lider.Equipa;
+        document.getElementById('statLiderPts').innerText = `${lider.Pontos} Pts em ${lider.Jogos} jogos`;
+
+        const sortedBySaldo = [...data].sort((a, b) => b.Saldo_Golos - a.Saldo_Golos);
+        const melhorSaldo = sortedBySaldo[0];
+        document.getElementById('statSaldo').innerText = `+${melhorSaldo.Saldo_Golos}`;
+        document.getElementById('statSaldoTime').innerText = `${melhorSaldo.Equipa} (${melhorSaldo.Golos_Marcados} GP / ${melhorSaldo.Golos_Sofridos} GC)`;
+
+        document.getElementById('statTotalClubes').innerText = data.length;
+    }
+
+    function renderTable(data) {
+        const tbody = document.getElementById('tableBody');
+        tbody.innerHTML = '';
+
+        data.forEach((row) => {
+            const tr = document.createElement('tr');
+            if (row.Posição <= 4) tr.classList.add('pos-g4');
+
+            const aproveitamento = ((row.Pontos / (row.Jogos * 3)) * 100).toFixed(1);
+            const posClass = row.Posição === 1 ? 'pos-badge pos-top1' : 'pos-badge';
+
+            // Fallback inteligente: se a imagem quebrar, exibe as iniciais do time
+            const iniciais = row.Equipa.substring(0, 3).toUpperCase();
+            const fallbackHTML = `<div class='fallback-badge'>${iniciais}</div>`;
+            const escudoImg = row.Escudo 
+                ? `<img src="${row.Escudo}" alt="${row.Equipa}" class="team-logo" onerror="this.onerror=null; this.outerHTML=\`${fallbackHTML}\`;">` 
+                : fallbackHTML;
+
+            tr.innerHTML = `
+                <td><div class="${posClass}">${row.Posição}</div></td>
+                <td>
+                    <div class="team-cell">
+                        ${escudoImg}
+                        <span>${row.Equipa}</span>
+                    </div>
+                </td>
+                <td class="pts-col">${row.Pontos}</td>
+                <td>${row.Jogos}</td>
+                <td>${row.Vitorias}</td>
+                <td>${row.Empates}</td>
+                <td>${row.Derrotas}</td>
+                <td>${row.Golos_Marcados}</td>
+                <td>${row.Golos_Sofridos}</td>
+                <td style="color: ${row.Saldo_Golos >= 0 ? '#22c55e' : '#ef4444'}">${row.Saldo_Golos > 0 ? '+' + row.Saldo_Golos : row.Saldo_Golos}</td>
+                <td><strong>${aproveitamento}%</strong></td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    document.getElementById('searchInput').addEventListener('input', (e) => {
+        const term = e.target.value.toLowerCase();
+        const filtered = rawData.filter(row => row.Equipa.toLowerCase().includes(term));
+        renderTable(filtered);
+    });
+
+    let sortAsc = false;
+    function sortTable(column) {
+        sortAsc = !sortAsc;
+        rawData.sort((a, b) => {
+            if (a[column] < b[column]) return sortAsc ? -1 : 1;
+            if (a[column] > b[column]) return sortAsc ? 1 : -1;
+            return 0;
+        });
+        renderTable(rawData);
+    }
+</script>
+
+</body>
+</html>
