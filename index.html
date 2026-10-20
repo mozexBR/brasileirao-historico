@@ -453,11 +453,13 @@
         data.forEach((row) => {
             const nomeCru = String(row['Jogadores'] || row['Jogador'] || "").trim();
             
-            // Ignora linhas de lixo
-            if (!nomeCru || nomeCru === "" || nomeCru === "Centroavante" || nomeCru === "Ponta Esquerda" || nomeCru === "Ponta Direita" || nomeCru === "Zagueiro" || nomeCru === "Volante") return;
+            // Ignora linhas de lixo ou cabeçalhos soltos
+            if (!nomeCru || nomeCru === "" || nomeCru === "NaN" || /^(Centroavante|Ponta|Seg\.|Meia|Zagueiro|Volante|Lateral|Goleiro|Atacante)/i.test(nomeCru)) return;
 
-            // Limpa a posição grudada no nome
-            const nomeLimpo = nomeCru.replace(/(Centroavante|Ponta Direita|Ponta Esquerda|Meia Ofensivo|Segundo Atacante|Meia Central|Zagueiro|Volante|Lateral Esquerdo|Lateral Direito|Goleiro)$/i, '').trim();
+            // REGEX SUPER COMPLETO: Limpa qualquer posição com hífen, ponto ou espaço no final do nome
+            const nomeLimpo = nomeCru
+                .replace(/\s*(Centroavante|Ponta[- ]Esquerda|Ponta[- ]Direita|Meia[- ]Ofensivo|Meia[- ]Central|Meia[- ]Direito|Meia[- ]Esquerdo|Seg\.\s*Atacante|Segundo\s*Atacante|Zagueiro|Volante|Lateral[- ]Esquerdo|Lateral[- ]Direito|Goleiro|Atacante|Meia)$/i, '')
+                .trim();
 
             const jogos = Number(row['Unnamed: 4'] || row['Jogos'] || row['Partidas'] || 0);
             const gols = Number(row['Unnamed: 7'] || row['Gols'] || row['Golos'] || 0);
