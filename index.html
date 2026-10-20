@@ -56,7 +56,7 @@
             font-size: 1rem;
         }
 
-        /* --- ABAS (TABS) --- */
+        /* --- ABAS DE NAVEGAÇÃO --- */
         .tabs {
             display: flex;
             justify-content: center;
@@ -275,9 +275,7 @@
         <button class="tab-btn" onclick="openTab('tab-artilheiros')">Maiores Artilheiros</button>
     </div>
 
-    <!-- ========================================== -->
-    <!-- CONTEÚDO DA ABA 1: CLUBES                  -->
-    <!-- ========================================== -->
+    <!-- ABA 1: CLUBES -->
     <div id="tab-clubes" class="tab-content active">
         <div class="stats-grid" id="statsGrid" style="display: none;">
             <div class="stat-card">
@@ -326,9 +324,7 @@
         </div>
     </div>
 
-    <!-- ========================================== -->
-    <!-- CONTEÚDO DA ABA 2: ARTILHEIROS             -->
-    <!-- ========================================== -->
+    <!-- ABA 2: ARTILHEIROS -->
     <div id="tab-artilheiros" class="tab-content">
         <div class="controls">
             <div class="search-box">
@@ -355,13 +351,11 @@
 </div>
 
 <script>
-    console.log("🚀 O Script arrancou!");
+    console.log("🚀 O script iniciou!");
     
-    // Variáveis Globais
     let rawDataClubes = [];
     let rawDataArtilheiros = [];
 
-    // LÓGICA DAS ABAS (TABS)
     function openTab(tabName) {
         document.querySelectorAll('.tab-content').forEach(tab => {
             tab.classList.remove('active');
@@ -373,22 +367,21 @@
         document.getElementById(tabName).classList.add('active');
         event.currentTarget.classList.add('active');
 
-        // Puxa o JSON de artilheiros apenas na primeira vez que abre a aba
         if (tabName === 'tab-artilheiros' && rawDataArtilheiros.length === 0) {
             carregarArtilheiros();
         }
     }
 
-    // CARREGA A TABELA DE CLUBES IMEDIATAMENTE
+    // Carrega a tabela de clubes
     fetch('tabela_historica.json?v=' + new Date().getTime())
         .then(res => {
-            if (!res.ok) throw new Error("Ficheiro JSON dos Clubes não encontrado.");
+            if (!res.ok) throw new Error("Arquivo JSON dos Clubes não encontrado.");
             return res.json();
         })
         .then(data => {
             initDashboardClubes(data);
         })
-        .catch(err => console.error("❌ ERRO CLUBES:", err));
+        .catch(err => console.error("❌ Erro nos clubes:", err));
 
     function initDashboardClubes(data) {
         rawDataClubes = data;
@@ -399,12 +392,12 @@
         document.getElementById('tableWrapper').style.display = 'block';
     }
 
-    // CARREGA A TABELA DE ARTILHEIROS
+    // Carrega a tabela de artilheiros
     function carregarArtilheiros() {
-        console.log("⏳ A buscar os Artilheiros...");
+        console.log("⏳ Buscando os Artilheiros...");
         fetch('artilheiros_transfermarkt.json?v=' + new Date().getTime())
             .then(res => {
-                if (!res.ok) throw new Error("Ficheiro JSON dos Artilheiros não encontrado.");
+                if (!res.ok) throw new Error("Arquivo JSON dos Artilheiros não encontrado.");
                 return res.json();
             })
             .then(data => {
@@ -412,12 +405,11 @@
                 renderTableArtilheiros(data);
             })
             .catch(err => {
-                console.error("❌ ERRO ARTILHEIROS:", err);
-                alert("Erro ao carregar artilheiros. Detalhes no console.");
+                console.error("❌ Erro nos artilheiros:", err);
+                alert("Erro ao carregar artilheiros. Atualize a página com Ctrl + F5.");
             });
     }
 
-    // RENDERIZA A TABELA DE CLUBES
     function renderTableClubes(data) {
         const tbody = document.getElementById('tableBody');
         tbody.innerHTML = '';
@@ -429,7 +421,7 @@
             const aproveitamento = ((row.Pontos / (row.Jogos * 3)) * 100).toFixed(1);
             const posClass = row.Posição === 1 ? 'pos-badge pos-top1' : 'pos-badge';
 
-            const iniciais = row.Equipa.substring(0, 3).toUpperCase();
+            const iniciais = row.Equipa ? row.Equipa.substring(0, 3).toUpperCase() : '---';
             const fallbackHTML = `<div class='fallback-badge'>${iniciais}</div>`;
             const escudoImg = row.Escudo 
                 ? `<img src="${row.Escudo}" alt="${row.Equipa}" class="team-logo" onerror="this.onerror=null; this.outerHTML=\`${fallbackHTML}\`;">` 
@@ -452,7 +444,6 @@
         });
     }
 
-    // RENDERIZA A TABELA DE ARTILHEIROS (Super Resistente ao JSON do Transfermarkt)
     function renderTableArtilheiros(data) {
         const tbody = document.getElementById('tableBodyArtilheiros');
         tbody.innerHTML = '';
@@ -460,17 +451,17 @@
         let posIndex = 1;
 
         data.forEach((row) => {
-            const nomeCru = row['Jogadores'] || row['Jogador'] || "";
-            // Ignora o lixo e linhas vazias
-            if (!nomeCru || nomeCru === "NaN" || nomeCru.includes("NaN") || nomeCru === "Centroavante" || nomeCru === "Ponta Esquerda" || nomeCru === "Ponta Direita" || nomeCru === "Zagueiro" || nomeCru === "Volante") return;
+            const nomeCru = String(row['Jogadores'] || row['Jogador'] || "").trim();
+            
+            // Ignora linhas de lixo
+            if (!nomeCru || nomeCru === "" || nomeCru === "Centroavante" || nomeCru === "Ponta Esquerda" || nomeCru === "Ponta Direita" || nomeCru === "Zagueiro" || nomeCru === "Volante") return;
 
-            // Limpa a posição que o Transfermarkt cola no nome
+            // Limpa a posição grudada no nome
             const nomeLimpo = nomeCru.replace(/(Centroavante|Ponta Direita|Ponta Esquerda|Meia Ofensivo|Segundo Atacante|Meia Central|Zagueiro|Volante|Lateral Esquerdo|Lateral Direito|Goleiro)$/i, '').trim();
 
-            const jogos = row['Unnamed: 4'] || row['Jogos'] || row['Partidas'] || 0;
-            const gols = row['Unnamed: 7'] || row['Gols'] || row['Golos'] || 0;
+            const jogos = Number(row['Unnamed: 4'] || row['Jogos'] || row['Partidas'] || 0);
+            const gols = Number(row['Unnamed: 7'] || row['Gols'] || row['Golos'] || 0);
             
-            // Só desenha se tiver golos
             if (gols === 0 || isNaN(gols)) return;
 
             const media = jogos > 0 ? (gols / jogos).toFixed(2) : '0.00';
@@ -494,7 +485,6 @@
         });
     }
 
-    // RENDERIZA OS STATS LÁ DE CIMA
     function renderStats(data) {
         if (!data || data.length === 0) return;
         const lider = data[0];
@@ -507,7 +497,7 @@
         document.getElementById('statTotalClubes').innerText = data.length;
     }
 
-    // PESQUISA
+    // Busca
     document.getElementById('searchInput').addEventListener('input', (e) => {
         const term = e.target.value.toLowerCase();
         const filtered = rawDataClubes.filter(row => row.Equipa.toLowerCase().includes(term));
@@ -517,14 +507,13 @@
     document.getElementById('searchArtilheiros').addEventListener('input', (e) => {
         const term = e.target.value.toLowerCase();
         const filtered = rawDataArtilheiros.filter(row => {
-            const nome = row['Jogadores'] || row['Jogador'] || "";
-            if (!nome || nome === "NaN" || nome === "Centroavante") return false;
+            const nome = String(row['Jogadores'] || row['Jogador'] || "");
             return nome.toLowerCase().includes(term);
         });
         renderTableArtilheiros(filtered);
     });
 
-    // ORDENAÇÃO
+    // Ordenação
     let sortAsc = false;
     function sortTable(column, tipo) {
         sortAsc = !sortAsc;
@@ -538,13 +527,8 @@
             renderTableClubes(rawDataClubes);
         } else {
             rawDataArtilheiros.sort((a, b) => {
-                let valA = a[column] || 0;
-                let valB = b[column] || 0;
-                
-                if (!isNaN(valA) && !isNaN(valB)) {
-                    valA = Number(valA);
-                    valB = Number(valB);
-                }
+                let valA = Number(a[column]) || 0;
+                let valB = Number(b[column]) || 0;
                 
                 if (valA < valB) return sortAsc ? -1 : 1;
                 if (valA > valB) return sortAsc ? 1 : -1;
