@@ -56,6 +56,46 @@
             font-size: 1rem;
         }
 
+        /* --- NOVOS ESTILOS PARA AS ABAS (TABS) --- */
+        .tabs {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .tab-btn {
+            background: var(--card-bg);
+            color: var(--text-secondary);
+            border: 1px solid var(--card-border);
+            padding: 0.8rem 1.5rem;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .tab-btn:hover {
+            background: var(--hover-bg);
+            color: var(--text-primary);
+        }
+
+        .tab-btn.active {
+            background: var(--accent-blue);
+            color: #fff;
+            border-color: var(--accent-blue);
+        }
+
+        /* Oculta as abas que não estão ativas */
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
@@ -174,7 +214,7 @@
             background: #eab308;
             color: #0f172a;
         }
-
+        
         .pos-g4 {
             border-left: 4px solid var(--accent-green);
         }
@@ -218,6 +258,7 @@
             header h1 { font-size: 1.6rem; }
             th, td { padding: 0.6rem 0.5rem; font-size: 0.85rem; }
             .team-logo, .fallback-badge { width: 24px; height: 24px; font-size: 0.55rem; }
+            .tabs { flex-direction: column; }
         }
     </style>
 </head>
@@ -226,102 +267,164 @@
 <div class="container">
     <header>
         <h1>Brasileirão — Era dos Pontos Corridos</h1>
-        <p>Ranking Histórico com Escudos dos Clubes (2003 - 2024)</p>
+        <p>Ranking Histórico com Escudos dos Clubes (2003 - 2026)</p>
     </header>
 
-    <div class="stats-grid" id="statsGrid" style="display: none;">
-        <div class="stat-card">
-            <h3>Líder Histórico</h3>
-            <div class="value" id="statLider">-</div>
-            <div class="subtext" id="statLiderPts">-</div>
+    <!-- MENU DE NAVEGAÇÃO -->
+    <div class="tabs">
+        <button class="tab-btn active" onclick="openTab('tab-clubes')">Classificação Histórica</button>
+        <button class="tab-btn" onclick="openTab('tab-artilheiros')">Maiores Artilheiros</button>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- CONTEÚDO DA ABA 1: CLUBES                  -->
+    <!-- ========================================== -->
+    <div id="tab-clubes" class="tab-content active">
+        <div class="stats-grid" id="statsGrid" style="display: none;">
+            <div class="stat-card">
+                <h3>Líder Histórico</h3>
+                <div class="value" id="statLider">-</div>
+                <div class="subtext" id="statLiderPts">-</div>
+            </div>
+            <div class="stat-card">
+                <h3>Melhor Saldo de Gols</h3>
+                <div class="value" id="statSaldo">-</div>
+                <div class="subtext" id="statSaldoTime">-</div>
+            </div>
+            <div class="stat-card">
+                <h3>Total de Clubes</h3>
+                <div class="value" id="statTotalClubes">-</div>
+                <div class="subtext">Já jogaram a Série A nos pontos corridos</div>
+            </div>
         </div>
-        <div class="stat-card">
-            <h3>Melhor Saldo de Gols</h3>
-            <div class="value" id="statSaldo">-</div>
-            <div class="subtext" id="statSaldoTime">-</div>
+
+        <div class="controls" id="controls" style="display: none;">
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="Buscar clube (ex: São Paulo, Flamengo, Palmeiras)...">
+            </div>
         </div>
-        <div class="stat-card">
-            <h3>Total de Clubes</h3>
-            <div class="value" id="statTotalClubes">-</div>
-            <div class="subtext">Já jogaram a Série A nos pontos corridos</div>
+
+        <div class="table-wrapper" id="tableWrapper" style="display: none;">
+            <table>
+                <thead>
+                    <tr>
+                        <th onclick="sortTable('Posição', 'clubes')">Pos</th>
+                        <th onclick="sortTable('Equipa', 'clubes')">Clube</th>
+                        <th onclick="sortTable('Pontos', 'clubes')">Pts</th>
+                        <th onclick="sortTable('Jogos', 'clubes')">J</th>
+                        <th onclick="sortTable('Vitorias', 'clubes')">V</th>
+                        <th onclick="sortTable('Empates', 'clubes')">E</th>
+                        <th onclick="sortTable('Derrotas', 'clubes')">D</th>
+                        <th onclick="sortTable('Golos_Marcados', 'clubes')">GP</th>
+                        <th onclick="sortTable('Golos_Sofridos', 'clubes')">GC</th>
+                        <th onclick="sortTable('Saldo_Golos', 'clubes')">SG</th>
+                        <th>Aprov (%)</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                </tbody>
+            </table>
         </div>
     </div>
 
-    <div class="controls" id="controls" style="display: none;">
-        <div class="search-box">
-            <input type="text" id="searchInput" placeholder="Buscar clube (ex: São Paulo, Flamengo, Palmeiras)...">
+    <!-- ========================================== -->
+    <!-- CONTEÚDO DA ABA 2: ARTILHEIROS             -->
+    <!-- ========================================== -->
+    <div id="tab-artilheiros" class="tab-content">
+        <div class="controls">
+            <div class="search-box">
+                <input type="text" id="searchArtilheiros" placeholder="Buscar jogador (ex: Fred, Gabigol)...">
+            </div>
         </div>
-    </div>
 
-    <div class="table-wrapper" id="tableWrapper" style="display: none;">
-        <table>
-            <thead>
-                <tr>
-                    <th onclick="sortTable('Posição')">Pos</th>
-                    <th onclick="sortTable('Equipa')">Clube</th>
-                    <th onclick="sortTable('Pontos')">Pts</th>
-                    <th onclick="sortTable('Jogos')">J</th>
-                    <th onclick="sortTable('Vitorias')">V</th>
-                    <th onclick="sortTable('Empates')">E</th>
-                    <th onclick="sortTable('Derrotas')">D</th>
-                    <th onclick="sortTable('Golos_Marcados')">GP</th>
-                    <th onclick="sortTable('Golos_Sofridos')">GC</th>
-                    <th onclick="sortTable('Saldo_Golos')">SG</th>
-                    <th>Aprov (%)</th>
-                </tr>
-            </thead>
-            <tbody id="tableBody">
-            </tbody>
-        </table>
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th onclick="sortTable('Pos', 'artilheiros')">Pos</th>
+                        <th onclick="sortTable('Jogador', 'artilheiros')">Jogador</th>
+                        <th onclick="sortTable('Jogos', 'artilheiros')">Partidas</th>
+                        <th onclick="sortTable('Gols', 'artilheiros')">Gols</th>
+                        <th>Média</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBodyArtilheiros">
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
 
 <script>
     console.log("🚀 O Script arrancou!");
-    let rawData = [];
+    
+    // Variáveis Globais para guardar os dados
+    let rawDataClubes = [];
+    let rawDataArtilheiros = [];
 
-    // Busca os dados IMEDIATAMENTE, sem esperar por eventos
+    // LÓGICA DAS ABAS (TABS)
+    function openTab(tabName) {
+        // Esconde todo o conteúdo
+        document.querySelectorAll('.tab-content').forEach(tab => {
+            tab.classList.remove('active');
+        });
+        // Remove a cor azul de todos os botões
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.classList.remove('active');
+        });
+
+        // Mostra apenas a aba clicada e pinta o botão
+        document.getElementById(tabName).classList.add('active');
+        event.currentTarget.classList.add('active');
+
+        // Se o utilizador abriu os Artilheiros e os dados ainda não foram puxados, faz o fetch agora!
+        if (tabName === 'tab-artilheiros' && rawDataArtilheiros.length === 0) {
+            carregarArtilheiros();
+        }
+    }
+
+    // CARREGA A TABELA DE CLUBES IMEDIATAMENTE (O original não muda)
     fetch('tabela_historica.json?v=' + new Date().getTime())
         .then(res => {
-            console.log("📦 Resposta do servidor GitHub:", res.status);
-            if (!res.ok) throw new Error("Ficheiro JSON não encontrado (Erro " + res.status + ")");
+            if (!res.ok) throw new Error("Ficheiro JSON dos Clubes não encontrado.");
             return res.json();
         })
         .then(data => {
-            console.log("✅ JSON carregado com sucesso! Clubes lidos:", data.length);
-            initDashboard(data);
+            console.log("✅ JSON Clubes carregado!");
+            initDashboardClubes(data);
         })
-        .catch(err => {
-            console.error("❌ ERRO GRAVE:", err);
-            alert("Erro ao carregar a tabela: " + err.message);
-        });
+        .catch(err => console.error("❌ ERRO CLUBES:", err));
 
-    function initDashboard(data) {
-        rawData = data;
+    function initDashboardClubes(data) {
+        rawDataClubes = data;
         renderStats(data);
-        renderTable(data);
+        renderTableClubes(data);
         document.getElementById('statsGrid').style.display = 'grid';
         document.getElementById('controls').style.display = 'flex';
         document.getElementById('tableWrapper').style.display = 'block';
-        console.log("✨ A tabela foi desenhada no ecrã!");
     }
 
-    function renderStats(data) {
-        if (!data || data.length === 0) return;
-        
-        const lider = data[0];
-        document.getElementById('statLider').innerText = lider.Equipa;
-        document.getElementById('statLiderPts').innerText = `${lider.Pontos} Pts em ${lider.Jogos} jogos`;
-
-        const sortedBySaldo = [...data].sort((a, b) => b.Saldo_Golos - a.Saldo_Golos);
-        const melhorSaldo = sortedBySaldo[0];
-        document.getElementById('statSaldo').innerText = `+${melhorSaldo.Saldo_Golos}`;
-        document.getElementById('statSaldoTime').innerText = `${melhorSaldo.Equipa} (${melhorSaldo.Golos_Marcados} GP / ${melhorSaldo.Golos_Sofridos} GC)`;
-
-        document.getElementById('statTotalClubes').innerText = data.length;
+    // FUNÇÃO NOVA: CARREGA A TABELA DE ARTILHEIROS (Puxa o seu novo ficheiro do Transfermarkt)
+    function carregarArtilheiros() {
+        console.log("⏳ A buscar os Artilheiros...");
+        fetch('artilheiros_transfermarkt.json?v=' + new Date().getTime())
+            .then(res => {
+                if (!res.ok) throw new Error("Ficheiro JSON dos Artilheiros não encontrado no GitHub.");
+                return res.json();
+            })
+            .then(data => {
+                console.log("✅ JSON Artilheiros carregado! Total:", data.length);
+                rawDataArtilheiros = data;
+                renderTableArtilheiros(data);
+            })
+            .catch(err => {
+                console.error("❌ ERRO ARTILHEIROS:", err);
+                alert("Erro ao carregar artilheiros: O ficheiro 'artilheiros_transfermarkt.json' já está no GitHub?");
+            });
     }
 
-    function renderTable(data) {
+    // RENDERIZA A TABELA DE CLUBES (O original não muda)
+    function renderTableClubes(data) {
         const tbody = document.getElementById('tableBody');
         tbody.innerHTML = '';
 
@@ -340,12 +443,7 @@
 
             tr.innerHTML = `
                 <td><div class="${posClass}">${row.Posição}</div></td>
-                <td>
-                    <div class="team-cell">
-                        ${escudoImg}
-                        <span>${row.Equipa}</span>
-                    </div>
-                </td>
+                <td><div class="team-cell">${escudoImg}<span>${row.Equipa}</span></div></td>
                 <td class="pts-col">${row.Pontos}</td>
                 <td>${row.Jogos}</td>
                 <td>${row.Vitorias}</td>
@@ -360,20 +458,99 @@
         });
     }
 
+    // FUNÇÃO NOVA: RENDERIZA A TABELA DE ARTILHEIROS
+    function renderTableArtilheiros(data) {
+        const tbody = document.getElementById('tableBodyArtilheiros');
+        tbody.innerHTML = '';
+
+        data.forEach((row, index) => {
+            const tr = document.createElement('tr');
+            const pos = index + 1; // Posição calculada automaticamente
+            const posClass = pos === 1 ? 'pos-badge pos-top1' : 'pos-badge';
+            
+            // O Transfermarkt traz o jogador dentro da coluna 'Jogador', 'Golos' em 'Gols', etc.
+            // Extrai nomes complexos e limpa os dados
+            const nomeJogador = row['Jogador'] || row['Jogador.1'] || "Desconhecido";
+            const jogos = row['Jogos'] || row['Partidas'] || 0;
+            const gols = row['Gols'] || row['Golos'] || 0;
+            
+            // Calcula a média de golos por partida
+            const media = jogos > 0 ? (gols / jogos).toFixed(2) : '0.00';
+
+            tr.innerHTML = `
+                <td><div class="${posClass}">${pos}</div></td>
+                <td>
+                    <div class="team-cell">
+                        <span>${nomeJogador}</span>
+                    </div>
+                </td>
+                <td>${jogos}</td>
+                <td class="pts-col">${gols}</td>
+                <td><strong>${media}</strong></td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    // RENDERIZA OS STATS LÁ DE CIMA (O original não muda)
+    function renderStats(data) {
+        if (!data || data.length === 0) return;
+        const lider = data[0];
+        document.getElementById('statLider').innerText = lider.Equipa;
+        document.getElementById('statLiderPts').innerText = `${lider.Pontos} Pts em ${lider.Jogos} jogos`;
+        const sortedBySaldo = [...data].sort((a, b) => b.Saldo_Golos - a.Saldo_Golos);
+        const melhorSaldo = sortedBySaldo[0];
+        document.getElementById('statSaldo').innerText = `+${melhorSaldo.Saldo_Golos}`;
+        document.getElementById('statSaldoTime').innerText = `${melhorSaldo.Equipa} (${melhorSaldo.Golos_Marcados} GP / ${melhorSaldo.Golos_Sofridos} GC)`;
+        document.getElementById('statTotalClubes').innerText = data.length;
+    }
+
+    // PESQUISA (CLUBES E ARTILHEIROS)
     document.getElementById('searchInput').addEventListener('input', (e) => {
         const term = e.target.value.toLowerCase();
-        const filtered = rawData.filter(row => row.Equipa.toLowerCase().includes(term));
-        renderTable(filtered);
+        const filtered = rawDataClubes.filter(row => row.Equipa.toLowerCase().includes(term));
+        renderTableClubes(filtered);
     });
 
-    let sortAsc = false;
-    function sortTable(column) {
-        sortAsc = !sortAsc;
-        rawData.sort((a, b) => {
-            if (a[column] < b[column]) return sortAsc ? -1 : 1;
-            if (a[column] > b[column]) return sortAsc ? 1 : -1;
-            return 0;
+    document.getElementById('searchArtilheiros').addEventListener('input', (e) => {
+        const term = e.target.value.toLowerCase();
+        const filtered = rawDataArtilheiros.filter(row => {
+            const nome = row['Jogador'] || row['Jogador.1'] || "";
+            return nome.toLowerCase().includes(term);
         });
-        renderTable(rawData);
+        renderTableArtilheiros(filtered);
+    });
+
+    // ORDENAÇÃO (Adaptada para ordenar qualquer uma das tabelas)
+    let sortAsc = false;
+    function sortTable(column, tipo) {
+        sortAsc = !sortAsc;
+        
+        if (tipo === 'clubes') {
+            rawDataClubes.sort((a, b) => {
+                if (a[column] < b[column]) return sortAsc ? -1 : 1;
+                if (a[column] > b[column]) return sortAsc ? 1 : -1;
+                return 0;
+            });
+            renderTableClubes(rawDataClubes);
+        } else {
+            rawDataArtilheiros.sort((a, b) => {
+                let valA = a[column] || a[column + '.1'] || 0;
+                let valB = b[column] || b[column + '.1'] || 0;
+                
+                // Converte para número se possível, para ordenar corretamente
+                if (!isNaN(valA) && !isNaN(valB)) {
+                    valA = Number(valA);
+                    valB = Number(valB);
+                }
+                
+                if (valA < valB) return sortAsc ? -1 : 1;
+                if (valA > valB) return sortAsc ? 1 : -1;
+                return 0;
+            });
+            renderTableArtilheiros(rawDataArtilheiros);
+        }
     }
 </script>
+</body>
+</html>
