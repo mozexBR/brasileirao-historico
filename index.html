@@ -356,6 +356,7 @@
     let rawDataClubes = [];
     let rawDataArtilheiros = [];
 
+    // FUNÇÃO OPENTAB NO TOPO PARA EVITAR ERRO DE REFERÊNCIA
     function openTab(tabName) {
         document.querySelectorAll('.tab-content').forEach(tab => {
             tab.classList.remove('active');
@@ -372,7 +373,7 @@
         }
     }
 
-    // Carrega a tabela de clubes
+    // Carrega a tabela de clubes imediatamente
     fetch('tabela_historica.json?v=' + new Date().getTime())
         .then(res => {
             if (!res.ok) throw new Error("Arquivo JSON dos Clubes não encontrado.");
@@ -453,10 +454,8 @@
         data.forEach((row) => {
             const nomeCru = String(row['Jogadores'] || row['Jogador'] || "").trim();
             
-            // Ignora linhas de lixo ou cabeçalhos soltos
             if (!nomeCru || nomeCru === "" || nomeCru === "NaN" || /^(Centroavante|Ponta|Seg\.|Meia|Zagueiro|Volante|Lateral|Goleiro|Atacante)/i.test(nomeCru)) return;
 
-            // REGEX SUPREMO CORRIGIDO: Limpa posições completas e abreviadas (incluindo Lateral Esq. / Dir.)
             const nomeLimpo = nomeCru
                 .replace(/\s*(Centroavante|Ponta[- ]Esquerda|Ponta[- ]Direita|Meia[- ]Ofensivo|Meia[- ]Central|Meia[- ]Direito|Meia[- ]Esquerdo|Seg\.\s*Atacante|Segundo\s*Atacante|Zagueiro|Volante|Lateral[- ]Esquerdo|Lateral[- ]Direito|Lateral\s*Esq\.|Lateral\s*Dir\.|Goleiro|Atacante|Meia)$/i, '')
                 .trim();
@@ -508,4 +507,37 @@
 
     document.getElementById('searchArtilheiros').addEventListener('input', (e) => {
         const term = e.target.value.toLowerCase();
-        const filtered = rawDataArtilheiros.filter(row
+        const filtered = rawDataArtilheiros.filter(row => {
+            const nome = String(row['Jogadores'] || row['Jogador'] || "");
+            return nome.toLowerCase().includes(term);
+        });
+        renderTableArtilheiros(filtered);
+    });
+
+    // Ordenação
+    let sortAsc = false;
+    function sortTable(column, tipo) {
+        sortAsc = !sortAsc;
+        
+        if (tipo === 'clubes') {
+            rawDataClubes.sort((a, b) => {
+                if (a[column] < b[column]) return sortAsc ? -1 : 1;
+                if (a[column] > b[column]) return sortAsc ? 1 : -1;
+                return 0;
+            });
+            renderTableClubes(rawDataClubes);
+        } else {
+            rawDataArtilheiros.sort((a, b) => {
+                let valA = Number(a[column]) || 0;
+                let valB = Number(b[column]) || 0;
+                
+                if (valA < valB) return sortAsc ? -1 : 1;
+                if (valA > valB) return sortAsc ? 1 : -1;
+                return 0;
+            });
+            renderTableArtilheiros(rawDataArtilheiros);
+        }
+    }
+</script>
+</body>
+</html>
