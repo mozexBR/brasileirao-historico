@@ -279,15 +279,20 @@
 <script>
     let rawData = [];
 
-    window.addEventListener('DOMContentLoaded', () => {
-        fetch('tabela_historica.json')
-            .then(res => res.json())
+   window.addEventListener('DOMContentLoaded', () => {
+        fetch('tabela_historica.json?v=' + new Date().getTime())
+            .then(res => {
+                if (!res.ok) throw new Error("Não encontrou o ficheiro JSON.");
+                return res.json();
+            })
             .then(data => {
                 initDashboard(data);
             })
-            .catch(err => console.error("Erro ao carregar o JSON:", err));
-    });
-
+            .catch(err => {
+                console.error(err);
+                alert("Erro ao carregar a tabela: " + err.message + "\n\nVerifique se o ficheiro tabela_historica.json está no GitHub e se não tem erros.");
+            });
+    
     function initDashboard(data) {
         rawData = data;
         renderStats(data);
